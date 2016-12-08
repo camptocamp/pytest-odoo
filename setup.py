@@ -4,9 +4,9 @@ setup(
     name='pytest-odoo',
     description='py.test plugin to run Odoo tests',
     long_description=open("README.rst").read(),
-    version='0.1.0',
+    version='0.2.0',
     url='https://github.com/camptocamp/pytest-odoo',
-    license='LGPLv3',
+    license='AGPLv3',
     author='Guewen Baconnier',
     author_email='guewen.baconnier@camptocamp.com',
     py_modules=['pytest_odoo'],
@@ -18,8 +18,7 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU Lesser '
-        'General Public License v3 (LGPLv3)',
+        'License :: OSI Approved :: GNU Affero General Public License v3',
         'Operating System :: POSIX',
         'Topic :: Software Development :: Testing',
         'Topic :: Software Development :: Libraries',
