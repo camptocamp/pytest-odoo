@@ -38,6 +38,9 @@ except ImportError:  # Odoo >= 10.0
 def pytest_cmdline_main(config):
     if os.environ.get('OPENERP_SERVER'):
         odoo.tools.config.parse_config([])
+        # force the use of test_enable
+        if not odoo.tools.config['test_enable']:
+            odoo.tools.config['test_enable'] = True
         dbname = odoo.tools.config['db_name']
         if not dbname:
             raise Exception(
