@@ -22,6 +22,8 @@ try:
 except ImportError:  # No odoo_autodiscover
     pass
 
+sys.path.insert(0, os.environ.get('OPENERP_PATH'))
+
 try:
     import openerp
     # Monkey patch for odoo_autodiscover
