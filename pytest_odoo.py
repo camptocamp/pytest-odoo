@@ -55,6 +55,20 @@ def pytest_cmdline_main(config):
         yield
 
 
+@pytest.fixture(scope='module', autouse=True)
+def enable_odoo_test_flag():
+    # When we run tests through Odoo, test_enable is always activated, and some
+    # code might rely on this (for instance to selectively disable database
+    # commits). When we run the tests through pytest, the flag is not
+    # activated, and if it was activated globally, it would make odoo start all
+    # tests in addition to the tests we are running through pytest.  If we
+    # enable the option only in the scope of the tests modules, we won't
+    # interfere with the odoo's loading of modules, thus we are good.
+    odoo.tools.config['test_enable'] = True
+    yield
+    odoo.tools.config['test_enable'] = False
+
+
 def pytest_pycollect_makemodule(path, parent):
     return OdooTestModule(path, parent)
 
