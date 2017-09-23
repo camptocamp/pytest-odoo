@@ -15,18 +15,9 @@ import py.code
 import py.error
 import py.path
 
-monkey = None
-
-try:
-    from odoo_autodiscover import monkey
-except ImportError:  # No odoo_autodiscover
-    pass
 
 try:
     import openerp
-    # Monkey patch for odoo_autodiscover
-    if monkey is not None:
-        monkey.patch()
     odoo = openerp
     odoo_namespace = 'openerp'
 except ImportError:  # Odoo >= 10.0
