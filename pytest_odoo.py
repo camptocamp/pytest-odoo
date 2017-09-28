@@ -46,6 +46,17 @@ def pytest_cmdline_main(config):
         yield
 
 
+@pytest.fixture(scope='session', autouse=True)
+def load_registry():
+    # Initialize the registry before running tests.
+    # If we don't do that, the modules will be loaded *inside* of the first
+    # test we run, which would trigger the launch of the postinstall tests
+    # (because we force 'test_enable' to True and the at end of the loading of
+    # the registry, the postinstall tests are run when test_enable is enabled).
+    # And also give wrong timing indications.
+    odoo.registry(odoo.tests.common.get_db_name())
+
+
 @pytest.fixture(scope='module', autouse=True)
 def enable_odoo_test_flag():
     # When we run tests through Odoo, test_enable is always activated, and some
