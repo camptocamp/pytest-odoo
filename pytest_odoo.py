@@ -15,20 +15,11 @@ import py.code
 import py.error
 import py.path
 
-monkey = None
-
-try:
-    from odoo_autodiscover import monkey
-except ImportError:  # No odoo_autodiscover
-    pass
 
 sys.path.insert(0, os.environ.get('OPENERP_PATH'))
 
 try:
     import openerp
-    # Monkey patch for odoo_autodiscover
-    if monkey is not None:
-        monkey.patch()
     odoo = openerp
     odoo_namespace = 'openerp'
 except ImportError:  # Odoo >= 10.0
@@ -40,9 +31,6 @@ except ImportError:  # Odoo >= 10.0
 def pytest_cmdline_main(config):
     if os.environ.get('OPENERP_SERVER'):
         odoo.tools.config.parse_config([])
-        # force the use of test_enable
-        if not odoo.tools.config['test_enable']:
-            odoo.tools.config['test_enable'] = True
         dbname = odoo.tools.config['db_name']
         if not dbname:
             raise Exception(
@@ -58,6 +46,31 @@ def pytest_cmdline_main(config):
             yield
     else:
         yield
+
+
+@pytest.fixture(scope='session', autouse=True)
+def load_registry():
+    # Initialize the registry before running tests.
+    # If we don't do that, the modules will be loaded *inside* of the first
+    # test we run, which would trigger the launch of the postinstall tests
+    # (because we force 'test_enable' to True and the at end of the loading of
+    # the registry, the postinstall tests are run when test_enable is enabled).
+    # And also give wrong timing indications.
+    odoo.registry(odoo.tests.common.get_db_name())
+
+
+@pytest.fixture(scope='module', autouse=True)
+def enable_odoo_test_flag():
+    # When we run tests through Odoo, test_enable is always activated, and some
+    # code might rely on this (for instance to selectively disable database
+    # commits). When we run the tests through pytest, the flag is not
+    # activated, and if it was activated globally, it would make odoo start all
+    # tests in addition to the tests we are running through pytest.  If we
+    # enable the option only in the scope of the tests modules, we won't
+    # interfere with the odoo's loading of modules, thus we are good.
+    odoo.tools.config['test_enable'] = True
+    yield
+    odoo.tools.config['test_enable'] = False
 
 
 def pytest_pycollect_makemodule(path, parent):
