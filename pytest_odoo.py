@@ -92,6 +92,11 @@ class OdooTestModule(_pytest.python.Module):
             if names[-1] == "__init__":
                 names.pop()
             modname = ".".join(names)
+            # modules installed with pip for odoo<=9 are into the
+            # odoo_addons namespace. Makes module part of the odoo namespace
+            if modname.startswith('odoo_addons'):
+                modname = odoo_namespace + '.addons.' + modname.replace(
+                    'odoo_addons.', '')
             # for modules in openerp/addons, since there is a __init__ the
             # module name is already fully qualified (maybe?)
             if not modname.startswith(odoo_namespace + '.addons.'):
