@@ -5,7 +5,6 @@
 
 import pytest
 import signal
-import logging
 import os
 import sys
 
@@ -25,16 +24,39 @@ except ImportError:  # Odoo >= 10.0
     odoo_namespace = 'odoo'
 
 
+def pytest_addoption(parser):
+    parser.addoption("--odoo-database",
+                     action="store",
+                     help="Name of the Odoo database to test")
+    parser.addoption("--odoo-log-level",
+                     action="store",
+                     default='critical',
+                     help="Log-level used by the Odoo process during tests")
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_cmdline_main(config):
-    if os.environ.get('OPENERP_SERVER'):
-        odoo.tools.config.parse_config([])
-        dbname = odoo.tools.config['db_name']
-        if not dbname:
+
+    if (config.getoption('--odoo-database')
+            or os.environ.get('OPENERP_SERVER')):
+        options = []
+        # Replace --odoo-<something> by --<something> and prepare the argument
+        # to propagate to odoo.
+        for option in ['--odoo-database', '--odoo-log-level']:
+            value = config.getoption(option)
+            if value:
+                odoo_arg = '--%s' % option[7:]
+                options.append('%s=%s' % (odoo_arg, value))
+
+        odoo.tools.config.parse_config(options)
+
+        if not odoo.tools.config['db_name']:
+            # if you fall here, it means you have OPENERP_SERVER pointing
+            # to a configuration file without 'database' configuration
             raise Exception(
                 "please provide a database name in the Odoo configuration file"
             )
-        logging.getLogger(odoo_namespace).setLevel(logging.CRITICAL)
+
         odoo.service.server.start(preload=[], stop=True)
         # odoo.service.server.start() modifies the SIGINT signal by its own
         # one which in fact prevents us to stop anthem with Ctrl-c.
