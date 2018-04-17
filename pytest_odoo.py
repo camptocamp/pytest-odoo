@@ -3,6 +3,7 @@
 # Copyright 2015 Odoo
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
+
 import pytest
 import signal
 import os
@@ -38,7 +39,8 @@ def pytest_addoption(parser):
 def pytest_cmdline_main(config):
 
     if (config.getoption('--odoo-database')
-            or os.environ.get('OPENERP_SERVER')):
+            or os.environ.get('OPENERP_SERVER')
+            or os.environ.get('ODOO_RC')):
         options = []
         # Replace --odoo-<something> by --<something> and prepare the argument
         # to propagate to odoo.
