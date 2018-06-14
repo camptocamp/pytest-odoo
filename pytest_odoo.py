@@ -14,6 +14,7 @@ import _pytest.python
 import py.code
 import py.error
 import py.path
+import threading
 
 
 try:
@@ -91,7 +92,9 @@ def enable_odoo_test_flag():
     # enable the option only in the scope of the tests modules, we won't
     # interfere with the odoo's loading of modules, thus we are good.
     odoo.tools.config['test_enable'] = True
+    threading.currentThread().testing = True
     yield
+    threading.currentThread().testing = False
     odoo.tools.config['test_enable'] = False
 
 
