@@ -79,6 +79,9 @@ def load_registry():
     # (because we force 'test_enable' to True and the at end of the loading of
     # the registry, the postinstall tests are run when test_enable is enabled).
     # And also give wrong timing indications.
+    # Finally we enable `testing` flag on current thread
+    # since Odoo sets it when loading test suites.
+    threading.currentThread().testing = True
     odoo.registry(odoo.tests.common.get_db_name())
 
 
@@ -92,9 +95,7 @@ def enable_odoo_test_flag():
     # enable the option only in the scope of the tests modules, we won't
     # interfere with the odoo's loading of modules, thus we are good.
     odoo.tools.config['test_enable'] = True
-    threading.currentThread().testing = True
     yield
-    threading.currentThread().testing = False
     odoo.tools.config['test_enable'] = False
 
 
