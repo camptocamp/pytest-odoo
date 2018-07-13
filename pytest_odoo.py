@@ -98,6 +98,13 @@ def enable_odoo_test_flag():
     yield
     odoo.tools.config['test_enable'] = False
 
+@pytest.fixture
+def env():
+    dbname = odoo.tests.common.get_db_name()
+    registry = odoo.modules.registry.RegistryManager.get(dbname)
+    cr = registry.cursor()
+    uid = odoo.SUPERUSER_ID
+    return odoo.api.Environment(cr, uid, {})
 
 def pytest_pycollect_makemodule(path, parent):
     return OdooTestModule(path, parent)
