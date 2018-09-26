@@ -101,9 +101,9 @@ def enable_odoo_test_flag():
 
 def pytest_pycollect_makemodule(path, parent):
     if path.basename == "__init__.py":
-       return pytest.Package(path, parent)
+        return OdooTestPackage(path, parent)
     else:
-       return OdooTestModule(path, parent)
+        return OdooTestModule(path, parent)
 
 
 # Original code of xmo-odoo:
@@ -169,3 +169,7 @@ class OdooTestModule(_pytest.python.Module):
             )
         self.config.pluginmanager.consider_module(mod)
         return mod
+
+
+class OdooTestPackage(_pytest.python.Package, OdooTestModule):
+    pass
