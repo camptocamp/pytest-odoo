@@ -99,13 +99,6 @@ def enable_odoo_test_flag():
     odoo.tools.config['test_enable'] = False
 
 
-def pytest_pycollect_makemodule(path, parent):
-    if path.basename == "__init__.py":
-       return pytest.Package(path, parent)
-    else:
-       return OdooTestModule(path, parent)
-
-
 # Original code of xmo-odoo:
 # https://github.com/odoo-dev/odoo/commit/95a131b7f4eebc6e2c623f936283153d62f9e70f
 class OdooTestModule(_pytest.python.Module):
@@ -169,3 +162,23 @@ class OdooTestModule(_pytest.python.Module):
             )
         self.config.pluginmanager.consider_module(mod)
         return mod
+
+
+class OdooTestPackage(_pytest.python.Package, OdooTestModule):
+    """Package with odoo module lookup.
+
+    Any python module inside the package will be imported with
+    the prefix `odoo.addons`.
+
+    This class is used to prevent loading odoo modules in duplicate,
+    which happens if a module is loaded with and without the prefix.
+    """
+
+    pass
+
+
+def pytest_pycollect_makemodule(path, parent):
+    if path.basename == "__init__.py":
+        return OdooTestPackage(path, parent)
+    else:
+        return OdooTestModule(path, parent)
