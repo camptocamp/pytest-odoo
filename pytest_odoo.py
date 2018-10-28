@@ -123,7 +123,9 @@ class OdooTestModule(_pytest.python.Module):
                     'odoo_addons.', '')
             # for modules in openerp/addons, since there is a __init__ the
             # module name is already fully qualified (maybe?)
-            if not modname.startswith(odoo_namespace + '.addons.'):
+            if (not modname.startswith(odoo_namespace + '.addons.')
+                    and modname != odoo_namespace + '.addons'
+                    and modname != odoo_namespace):
                 modname = odoo_namespace + '.addons.' + modname
 
             __import__(modname)
