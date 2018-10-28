@@ -165,6 +165,9 @@ class OdooTestModule(_pytest.python.Module):
         self.config.pluginmanager.consider_module(mod)
         return mod
 
+    def __repr__(self):
+        return "<Module %r>" % (getattr(self, "name", None), )
+
 
 class OdooTestPackage(_pytest.python.Package, OdooTestModule):
     """Package with odoo module lookup.
@@ -176,7 +179,8 @@ class OdooTestPackage(_pytest.python.Package, OdooTestModule):
     which happens if a module is loaded with and without the prefix.
     """
 
-    pass
+    def __repr__(self):
+        return "<Package %r>" % (getattr(self, "name", None), )
 
 
 def pytest_pycollect_makemodule(path, parent):
