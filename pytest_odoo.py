@@ -131,8 +131,9 @@ class OdooTestModule(_pytest.python.Module):
             __import__(modname)
             mod = sys.modules[modname]
             if self.fspath.basename == "__init__.py":
-                return mod # we don't check anything as we might
-                           # we in a namespace package ... too icky to check
+                # we don't check anything as we might
+                # we in a namespace package ... too icky to check
+                return mod
             modfile = mod.__file__
             if modfile[-4:] in ('.pyc', '.pyo'):
                 modfile = modfile[:-1]
@@ -159,8 +160,7 @@ class OdooTestModule(_pytest.python.Module):
                 "which is not the same as the test file we want to collect:\n"
                 "  %s\n"
                 "HINT: remove __pycache__ / .pyc files and/or use a "
-                "unique basename for your test file modules"
-                 % e.args
+                "unique basename for your test file modules" % e.args
             )
         self.config.pluginmanager.consider_module(mod)
         return mod
