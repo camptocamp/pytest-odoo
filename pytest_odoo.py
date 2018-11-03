@@ -123,14 +123,17 @@ class OdooTestModule(_pytest.python.Module):
                     'odoo_addons.', '')
             # for modules in openerp/addons, since there is a __init__ the
             # module name is already fully qualified (maybe?)
-            if not modname.startswith(odoo_namespace + '.addons.'):
+            if (not modname.startswith(odoo_namespace + '.addons.')
+                    and modname != odoo_namespace + '.addons'
+                    and modname != odoo_namespace):
                 modname = odoo_namespace + '.addons.' + modname
 
             __import__(modname)
             mod = sys.modules[modname]
             if self.fspath.basename == "__init__.py":
-                return mod # we don't check anything as we might
-                           # we in a namespace package ... too icky to check
+                # we don't check anything as we might
+                # we in a namespace package ... too icky to check
+                return mod
             modfile = mod.__file__
             if modfile[-4:] in ('.pyc', '.pyo'):
                 modfile = modfile[:-1]
@@ -157,11 +160,13 @@ class OdooTestModule(_pytest.python.Module):
                 "which is not the same as the test file we want to collect:\n"
                 "  %s\n"
                 "HINT: remove __pycache__ / .pyc files and/or use a "
-                "unique basename for your test file modules"
-                 % e.args
+                "unique basename for your test file modules" % e.args
             )
         self.config.pluginmanager.consider_module(mod)
         return mod
+
+    def __repr__(self):
+        return "<Module %r>" % (getattr(self, "name", None), )
 
 
 class OdooTestPackage(_pytest.python.Package, OdooTestModule):
@@ -174,7 +179,8 @@ class OdooTestPackage(_pytest.python.Package, OdooTestModule):
     which happens if a module is loaded with and without the prefix.
     """
 
-    pass
+    def __repr__(self):
+        return "<Package %r>" % (getattr(self, "name", None), )
 
 
 def pytest_pycollect_makemodule(path, parent):
