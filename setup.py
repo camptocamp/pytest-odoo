@@ -4,7 +4,8 @@ setup(
     name='pytest-odoo',
     description='py.test plugin to run Odoo tests',
     long_description=open("README.rst").read(),
-    version='0.4.4',
+    version='0.4.5',
+    use_scm_version=True,
     url='https://github.com/camptocamp/pytest-odoo',
     license='AGPLv3',
     author='Guewen Baconnier',
@@ -17,7 +18,10 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms='any',
-    install_requires=['pytest>=2.9'],
+    install_requires=[
+        'pytest>=2.9',
+        'setuptools_scm',
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
