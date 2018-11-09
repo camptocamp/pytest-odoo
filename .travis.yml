@@ -1,0 +1,13 @@
+language: python
+script:
+- echo "no tests"
+deploy:
+  provider: pypi
+  user: Guewen.Baconnier
+  password:
+    secure: bzjeEwCpstvgICdnBLZoRKe5UjCC0kcM3H6e9maw+aOhmjx6qKfjVfGNM7Vsr7/obBHudBm08ydfyVLEuwbwRdZl/oYMtMkQtQIWsoJN21CPxd6gmN4JQlmNFegd5mIR+0q8PW2uYI7LHrrFPocYtPt7a6eu8l0VtyohBx93zP//aZTybBR76mKyxz3A1gyP8IxgPRihacOjWG8SOLZ/asXWGKH5z60h7blczEBSJmqmmKP0FPyXIQSTbPHUFL49cbVFgBEHyr2dyAJJqUSKHMaSyFNsLYgEdkM2v4hwBCrd6u/OpK0R/3PRMCY5mkddK1rlDb2CqD+RCPSwjxKIqSi2kPjGWqlcTQ/uuyOCJQ3dP2dB+GS4avbTp2gCLoSkKQ/FBa7A6bKmEH1ITY/gpVhkjuNOch6zff6N+fQK49W4gJrJgLMbkDuVljOgWpCLQmwQ8IVgJRSl1eML2rFI+JqUcDPrfTuSK9lFvT+aeahcE9j9bvJ2o0uimTLSaeH6ol90PaGPCKBVxGJpDBS+ANwxH3At16QnIp65QN7Ijp/1xm2eE8uzIs0wq96pmNUKT3OF9Z8bC+zlXzNRzyNsSZ9tcBGD0R1hQLPpyGIbRGhW7qqkfBwbE+J9oyrbz2NDoV78aDDGE3xnqBlwB+WL1Rn2vm1diE4STAQv5guPCEA=
+  distributions: sdist bdist_wheel
+  on:
+    repo: camptocamp/pytest-odoo
+    branch: master
+    tags: true
