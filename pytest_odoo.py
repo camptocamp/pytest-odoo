@@ -127,6 +127,9 @@ class OdooTestModule(_pytest.python.Module):
                     and modname != odoo_namespace + '.addons'
                     and modname != odoo_namespace):
                 modname = odoo_namespace + '.addons.' + modname
+            # fix module name when custom modules are installed directly under default odoo ./addons folder
+            if modname.startswith(odoo_namespace + '.addons.addons.'):
+                modname = modname.replace(odoo_namespace + '.addons.addons.', odoo_namespace + '.addons.')
 
             __import__(modname)
             mod = sys.modules[modname]
