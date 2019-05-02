@@ -30,6 +30,9 @@ def pytest_addoption(parser):
     parser.addoption("--odoo-database",
                      action="store",
                      help="Name of the Odoo database to test")
+    parser.addoption("--odoo-config",
+                     action="store",
+                     help="Path of the Odoo configuration file")
     parser.addoption("--odoo-log-level",
                      action="store",
                      default='critical',
@@ -45,7 +48,7 @@ def pytest_cmdline_main(config):
         options = []
         # Replace --odoo-<something> by --<something> and prepare the argument
         # to propagate to odoo.
-        for option in ['--odoo-database', '--odoo-log-level']:
+        for option in ['--odoo-database', '--odoo-log-level', '--odoo-config']:
             value = config.getoption(option)
             if value:
                 odoo_arg = '--%s' % option[7:]
