@@ -43,6 +43,7 @@ def pytest_addoption(parser):
 def pytest_cmdline_main(config):
 
     if (config.getoption('--odoo-database')
+            or config.getoption('--odoo-config')
             or os.environ.get('OPENERP_SERVER')
             or os.environ.get('ODOO_RC')):
         options = []
