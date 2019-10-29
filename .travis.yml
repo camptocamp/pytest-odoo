@@ -1,0 +1,15 @@
+language: python
+python:
+  - "3.5"
+script:
+- echo "no tests"
+deploy:
+  provider: pypi
+  skip_existing: true
+  user: Guewen.Baconnier
+  password: $PYPI_PASSWORD
+  distributions: sdist bdist_wheel
+  on:
+    repo: camptocamp/pytest-odoo
+    branch: master
+    tags: true
