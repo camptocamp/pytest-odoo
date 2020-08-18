@@ -4,18 +4,17 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 
-import pytest
-import signal
 import os
+import signal
 import sys
+import threading
 
 import _pytest
 import _pytest.python
 import py.code
 import py.error
 import py.path
-import threading
-
+import pytest
 
 try:
     import openerp
@@ -189,6 +188,6 @@ class OdooTestPackage(_pytest.python.Package, OdooTestModule):
 
 def pytest_pycollect_makemodule(path, parent):
     if path.basename == "__init__.py":
-        return OdooTestPackage(path, parent)
+        return OdooTestPackage.from_parent(parent, fspath=path)
     else:
-        return OdooTestModule(path, parent)
+        return OdooTestModule.from_parent(parent, fspath=path)
