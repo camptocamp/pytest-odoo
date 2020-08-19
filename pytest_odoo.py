@@ -186,8 +186,21 @@ class OdooTestPackage(_pytest.python.Package, OdooTestModule):
         return "<Package %r>" % (getattr(self, "name", None), )
 
 
+def supports_from_parent(node):
+    """ Check if pytest supports from_parent constructor
+
+    Node Construction changed to Node.from_parent in pytest 5.4
+    """
+    if hasattr(node, "from_parent"):
+        return True
+
+
 def pytest_pycollect_makemodule(path, parent):
     if path.basename == "__init__.py":
-        return OdooTestPackage.from_parent(parent, fspath=path)
+        if supports_from_parent(OdooTestPackage):
+            return OdooTestPackage.from_parent(parent, fspath=path)
+        return OdooTestPackage(path, parent)
     else:
-        return OdooTestModule.from_parent(parent, fspath=path)
+        if supports_from_parent(OdooTestModule):
+            return OdooTestModule.from_parent(parent, fspath=path)
+        return OdooTestModule(path, parent)
