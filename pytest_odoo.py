@@ -21,7 +21,7 @@ try:
     odoo = openerp
     odoo_namespace = 'openerp'
 except ImportError:  # Odoo >= 10.0
-    import odoo.tests:wq  # noqa
+    import odoo.tests  # noqa
     odoo_namespace = 'odoo'
 
 
