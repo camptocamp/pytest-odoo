@@ -68,7 +68,12 @@ def pytest_cmdline_main(config):
         # one which in fact prevents us to stop anthem with Ctrl-c.
         # Restore the default one.
         signal.signal(signal.SIGINT, signal.default_int_handler)
-        with odoo.api.Environment.manage():
+
+        if odoo.release.version_info < (15,):
+            # Refactor in Odoo 15, not needed anymore
+            with odoo.api.Environment.manage():
+                yield
+        else:
             yield
     else:
         yield
