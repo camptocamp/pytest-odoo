@@ -18,7 +18,7 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'pytest>=2.9',
+        'pytest>=7.0.0',
     ],
     setup_requires=[
         'setuptools_scm',
