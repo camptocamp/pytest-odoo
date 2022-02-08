@@ -13,8 +13,9 @@ import _pytest
 import _pytest.python
 import py.code
 import py.error
-import py.path
 import pytest
+
+from pathlib import Path
 
 try:
     import openerp
@@ -203,9 +204,9 @@ def supports_from_parent(node):
 def pytest_pycollect_makemodule(path, parent):
     if path.basename == "__init__.py":
         if supports_from_parent(OdooTestPackage):
-            return OdooTestPackage.from_parent(parent, fspath=path)
+            return OdooTestPackage.from_parent(parent, path=Path(path))
         return OdooTestPackage(path, parent)
     else:
         if supports_from_parent(OdooTestModule):
-            return OdooTestModule.from_parent(parent, fspath=path)
+            return OdooTestModule.from_parent(parent, path=Path(path))
         return OdooTestModule(path, parent)
