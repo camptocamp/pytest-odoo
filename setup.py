@@ -4,6 +4,7 @@ setup(
     name='pytest-odoo',
     description='py.test plugin to run Odoo tests',
     long_description=open("README.rst").read(),
+    long_description_content_type="text/x-rst",
     use_scm_version=True,
     url='https://github.com/camptocamp/pytest-odoo',
     license='AGPLv3',

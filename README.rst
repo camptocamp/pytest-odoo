@@ -14,7 +14,7 @@ Consider that all the tests are running `post-install` with pytest-odoo, as you 
 
 At the end of the day, its beneficial to run the Odoo tests with `--test-enable` because, as in very rare conditions,
 a test can pass with pytest-odoo but not with the "at install" tests run during the upgrade (or the oposite).
-Pytest-odoo can be considered a development tool, but not the tool that should replace entirely `--test-enable in a CI.
+Pytest-odoo can be considered a development tool, but not the tool that should replace entirely `--test-enable` in a CI.
 
 See also the `official Odoo documentation <https://www.odoo.com/documentation/15.0/developer/reference/backend/testing.html#testing-python-code>`_ on writing tests.
 
