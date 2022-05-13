@@ -11,9 +11,6 @@ setup(
     author='Guewen Baconnier',
     author_email='guewen.baconnier@camptocamp.com',
     py_modules=['pytest_odoo'],
-    extras_require={
-        'autodiscover': ['odoo_autodiscover>=2'],
-    },
     entry_points={'pytest11': ['odoo = pytest_odoo']},
     zip_safe=False,
     include_package_data=True,
