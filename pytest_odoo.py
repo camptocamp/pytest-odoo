@@ -4,18 +4,19 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 
+import ast
 import os
 import signal
 import sys
 import threading
+from pathlib import Path
+from typing import Optional
 
 import _pytest
 import _pytest.python
 import py.code
 import py.error
 import pytest
-
-from pathlib import Path
 
 import odoo
 
@@ -186,3 +187,34 @@ def pytest_pycollect_makemodule(path, parent):
         return OdooTestPackage.from_parent(parent, path=Path(path))
     else:
         return OdooTestModule.from_parent(parent, path=Path(path))
+
+
+def _find_manifest_path(collection_path: Path) -> Path:
+    """Try to locate an Odoo manifest file in the collection path."""
+    # check if collection_path is an addon directory
+    manifest_path = collection_path / "__manifest__.py"
+    if manifest_path.is_file():
+        return manifest_path
+    # check if collection_path is the tests directory of an addon
+    if collection_path.name == "tests":
+        manifest_path = collection_path.parent / "__manifest__.py"
+        if manifest_path.is_file():
+            return manifest_path
+    # cehck if collection_path is a file in the tests directory of an addon
+    if collection_path.parent.name == "tests":
+        manifest_path = collection_path.parent.parent / "__manifest__.py"
+        if manifest_path.is_file():
+            return manifest_path
+    return None
+
+
+def pytest_ignore_collect(collection_path: Path) -> Optional[bool]:
+    """Do not collect tests of modules that are marked non installable."""
+    manifest_path = _find_manifest_path(collection_path)
+    if not manifest_path:
+        return None
+    manifest = ast.literal_eval(manifest_path.read_text())
+    if not manifest.get("installable", True):
+        # installable = False, do not collect this
+        return True
+    return None
