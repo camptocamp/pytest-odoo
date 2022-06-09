@@ -192,17 +192,13 @@ def pytest_pycollect_makemodule(path, parent):
 def _find_manifest_path(collection_path: Path) -> Path:
     """Try to locate an Odoo manifest file in the collection path."""
     # check if collection_path is an addon directory
-    manifest_path = collection_path / "__manifest__.py"
-    if manifest_path.is_file():
-        return manifest_path
-    # check if collection_path is the tests directory of an addon
-    if collection_path.name == "tests":
-        manifest_path = collection_path.parent / "__manifest__.py"
-        if manifest_path.is_file():
-            return manifest_path
-    # cehck if collection_path is a file in the tests directory of an addon
-    if collection_path.parent.name == "tests":
-        manifest_path = collection_path.parent.parent / "__manifest__.py"
+    candidates = (
+        collection_path,  # addon directory
+        collection_path.parent,  # tests dir of an addon
+        collection_path.parent.parent  # file in the tests dir of an addon
+    )
+    for path in candidates:
+        manifest_path = path / "__manifest__.py"
         if manifest_path.is_file():
             return manifest_path
     return None
