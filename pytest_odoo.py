@@ -19,6 +19,7 @@ import py.error
 import pytest
 
 import odoo
+import odoo.tests
 
 
 def pytest_addoption(parser):
