@@ -182,7 +182,9 @@ class OdooTestPackage(_pytest.python.Package, OdooTestModule):
         return "<Package %r>" % (getattr(self, "name", None), )
 
 
-def pytest_pycollect_makemodule(path, parent):
+def pytest_pycollect_makemodule(module_path, path, parent):
+    if not _find_manifest_path(module_path):
+        return None
     if path.basename == "__init__.py":
         return OdooTestPackage.from_parent(parent, path=Path(path))
     else:
