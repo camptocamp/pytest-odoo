@@ -84,7 +84,7 @@ def load_registry():
     # And also give wrong timing indications.
     # Finally we enable `testing` flag on current thread
     # since Odoo sets it when loading test suites.
-    threading.currentThread().testing = True
+    threading.current_thread().testing = True
     odoo.registry(odoo.tests.common.get_db_name())
 
 
