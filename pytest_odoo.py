@@ -14,9 +14,12 @@ from typing import Optional
 
 import _pytest
 import _pytest.python
-import py.code
-import py.error
 import pytest
+
+from _pytest._code.code import ExceptionInfo
+import _pytest._py.error as error
+
+from pathlib import Path
 
 import odoo
 import odoo.tests
@@ -144,13 +147,14 @@ class OdooTestModule(_pytest.python.Module):
                     modfile = modfile[:-12]
             try:
                 issame = self.fspath.samefile(modfile)
-            except py.error.ENOENT:
+            except error.ENOENT:
                 issame = False
             if not issame:
                 raise self.fspath.ImportMismatchError(modname, modfile, self)
-        except SyntaxError:
+        except SyntaxError as e:
             raise self.CollectError(
-                py.code.ExceptionInfo().getrepr(style="short"))
+                ExceptionInfo.from_current().getrepr(style="short")
+            ) from e
         except self.fspath.ImportMismatchError:
             e = sys.exc_info()[1]
             raise self.CollectError(
