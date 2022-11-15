@@ -21,7 +21,7 @@ setup(
     setup_requires=[
         'setuptools_scm',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
