@@ -35,7 +35,16 @@ The custom options are:
 * ``--odoo-log-level``: log level as expected by odoo. As time of writing: info, debug_rpc, warn, test, critical, debug_sql, error, debug, debug_rpc_answer. The default is critical to have a clean output.
 * ``--odoo-config``: path of the odoo.cfg file to use.
 
-Alternatively, you can use the ``OPENERP_SERVER`` environment variable using an odoo configuration file, containing at least the ``database`` option with the name of the database to test::
+Alternatively, you can use environment variables, like the Odoo Docker image:
+
+* ``HOST``: hostname of the database server
+* ``PORT``: port of the database server
+* ``USER``: username to access the database
+* ``PASSWORD``: password to access the database
+
+These only work in addition to ``--odoo-database``.
+
+For backwards compatibility reasons, you can use the ``OPENERP_SERVER`` environment variable using an odoo configuration file, containing at least the ``database`` option with the name of the database to test::
 
    export OPENERP_SERVER=/path/to/odoo/config.cfg
    pytest ...
