@@ -13,16 +13,12 @@ from pathlib import Path
 from typing import Optional
 
 import _pytest
-import _pytest.python
-import pytest
-
-from _pytest._code.code import ExceptionInfo
 import _pytest._py.error as error
-
-from pathlib import Path
-
+import _pytest.python
 import odoo
 import odoo.tests
+import pytest
+from _pytest._code.code import ExceptionInfo
 
 
 def pytest_addoption(parser):
@@ -36,6 +32,9 @@ def pytest_addoption(parser):
                      action="store",
                      default='critical',
                      help="Log-level used by the Odoo process during tests")
+    parser.addoption("--odoo-http",
+                     action="store_true",
+                     help="If pytest should launch an Odoo http server.")
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -77,6 +76,13 @@ def pytest_cmdline_main(config):
             yield
     else:
         yield
+
+
+@pytest.fixture(scope="module", autouse=True)
+def load_http(request):
+    if request.config.getoption("--odoo-http"):
+        odoo.service.server.start(stop=True)
+        signal.signal(signal.SIGINT, signal.default_int_handler)
 
 
 @pytest.fixture(scope='session', autouse=True)
