@@ -6,7 +6,7 @@ script:
 deploy:
   provider: pypi
   skip_existing: true
-  user: Guewen.Baconnier
+  user: simahawk
   password: $PYPI_PASSWORD
   distributions: sdist bdist_wheel
   on:
