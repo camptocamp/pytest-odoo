@@ -37,6 +37,8 @@ def pytest_addoption(parser):
                      help="If pytest should launch an Odoo http server.")
     parser.addoption("--odoo-dev",
                      action="store")
+    parser.addoption("--odoo-addons-path",
+                     action="store")
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -55,6 +57,7 @@ def pytest_cmdline_main(config):
             '--odoo-log-level',
             '--odoo-config',
             '--odoo-dev',
+            '--odoo-addons-path',
         ]
         for option in available_options:
             value = config.getoption(option)
