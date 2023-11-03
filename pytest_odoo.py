@@ -35,6 +35,8 @@ def pytest_addoption(parser):
     parser.addoption("--odoo-http",
                      action="store_true",
                      help="If pytest should launch an Odoo http server.")
+    parser.addoption("--odoo-dev",
+                     action="store")
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -42,12 +44,19 @@ def pytest_cmdline_main(config):
 
     if (config.getoption('--odoo-database')
             or config.getoption('--odoo-config')
+            or config.getoption('--odoo-dev')
             or os.environ.get('OPENERP_SERVER')
             or os.environ.get('ODOO_RC')):
         options = []
         # Replace --odoo-<something> by --<something> and prepare the argument
         # to propagate to odoo.
-        for option in ['--odoo-database', '--odoo-log-level', '--odoo-config']:
+        available_options = [
+            '--odoo-database',
+            '--odoo-log-level',
+            '--odoo-config',
+            '--odoo-dev',
+        ]
+        for option in available_options:
             value = config.getoption(option)
             if value:
                 odoo_arg = '--%s' % option[7:]
