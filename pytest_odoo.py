@@ -63,7 +63,7 @@ def pytest_cmdline_main(config):
         odoo.tools.config.parse_config(options)
 
         if not odoo.tools.config['db_name']:
-            # if you fall here, it means you have OPENERP_SERVER pointing
+            # if you fall here, it means you have ODOO_RC or OPENERP_SERVER pointing
             # to a configuration file without 'database' configuration
             raise Exception(
                 "please provide a database name in the Odoo configuration file"
