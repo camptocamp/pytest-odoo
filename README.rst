@@ -44,7 +44,7 @@ Alternatively, you can use environment variables, like the Odoo Docker image:
 
 These only work in addition to ``--odoo-database``.
 
-For backwards compatibility reasons, you can use the ``OPENERP_SERVER`` environment variable using an odoo configuration file, containing at least the ``database`` option with the name of the database to test::
+You can use the ``ODOO_RC`` environment variable using an odoo configuration file, containing at least the ``database`` option with the name of the database to test::
 
    export OPENERP_SERVER=/path/to/odoo/config.cfg
    pytest ...
