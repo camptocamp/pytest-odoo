@@ -37,8 +37,17 @@ The custom options are:
 * ``--odoo-http``: Allow to launch the Odoo http instance
 
 
-Alternatively, you can use the ``OPENERP_SERVER`` environment variable using an odoo configuration file, containing at least the ``database`` option with the name of the database to test::
+Alternatively, you can use environment variables, like the Odoo Docker image:
 
-   export OPENERP_SERVER=/path/to/odoo/config.cfg
+* ``HOST``: hostname of the database server
+* ``PORT``: port of the database server
+* ``USER``: username to access the database
+* ``PASSWORD``: password to access the database
+
+These only work in addition to ``--odoo-database``.
+
+You can use the ``ODOO_RC`` environment variable using an odoo configuration file, containing at least the ``database`` option with the name of the database to test::
+
+   export ODOO_RC=/path/to/odoo/config.cfg
    pytest ...
 

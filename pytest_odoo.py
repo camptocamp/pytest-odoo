@@ -65,10 +65,16 @@ def pytest_cmdline_main(config):
                 odoo_arg = '--%s' % option[7:]
                 options.append('%s=%s' % (odoo_arg, value))
 
+        # Check the environment variables supported by the Odoo Docker image
+        # ref: https://hub.docker.com/_/odoo
+        for arg in ['HOST', 'PORT', 'USER', 'PASSWORD']:
+            if os.environ.get(arg):
+                options.append('--db_%s=%s' % (arg.lower(), os.environ.get(arg)))
+
         odoo.tools.config.parse_config(options)
 
         if not odoo.tools.config['db_name']:
-            # if you fall here, it means you have OPENERP_SERVER pointing
+            # if you fall here, it means you have ODOO_RC or OPENERP_SERVER pointing
             # to a configuration file without 'database' configuration
             raise Exception(
                 "please provide a database name in the Odoo configuration file"
