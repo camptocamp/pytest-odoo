@@ -38,6 +38,7 @@ def pytest_addoption(parser):
     )
     parser.addoption("--odoo-dev", action="store")
     parser.addoption("--odoo-addons-path", action="store")
+    parser.addoption("--odoo-ignore-env", action="store_false")
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -67,9 +68,10 @@ def pytest_cmdline_main(config):
 
         # Check the environment variables supported by the Odoo Docker image
         # ref: https://hub.docker.com/_/odoo
-        for arg in ["HOST", "PORT", "USER", "PASSWORD"]:
-            if os.environ.get(arg):
-                options.append("--db_%s=%s" % (arg.lower(), os.environ.get(arg)))
+        if not config.getoption("--odoo-ignore-env"):
+            for arg in ["HOST", "PORT", "USER", "PASSWORD"]:
+                if os.environ.get(arg):
+                    options.append("--db_%s=%s" % (arg.lower(), os.environ.get(arg)))
 
         odoo.tools.config.parse_config(options)
 
