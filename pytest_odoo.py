@@ -39,7 +39,7 @@ def pytest_addoption(parser):
                      action="store")
     parser.addoption("--odoo-addons-path",
                      action="store")
-    parser.addoption("--odoo-ignore-env", action="store_false")
+    parser.addoption("--odoo-ignore-env", action="store_true")
 
 
 @pytest.hookimpl(hookwrapper=True)
