@@ -16,7 +16,7 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'pytest>=7.2.0,<8.0.0',
+        'pytest>=8.0.0',
     ],
     setup_requires=[
         'setuptools_scm',
@@ -30,6 +30,6 @@ setup(
         'Topic :: Software Development :: Testing',
         'Topic :: Software Development :: Libraries',
         'Topic :: Utilities',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ]
 )
