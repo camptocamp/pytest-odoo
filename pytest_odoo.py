@@ -43,7 +43,6 @@ def pytest_addoption(parser):
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_cmdline_main(config):
-
     if (config.getoption('--odoo-database')
             or config.getoption('--odoo-config')
             or config.getoption('--odoo-dev')
@@ -224,10 +223,12 @@ def _find_manifest_path(collection_path: Path) -> Path:
     """Try to locate an Odoo manifest file in the collection path."""
     # check if collection_path is an addon directory
     path = collection_path
-    level = 0
-    while level < 5  and not (path.parent / "__manifest__.py").is_file():
+    for _ in range(0, 5): 
+        if (path.parent / "__manifest__.py").is_file():
+            break
         path = path.parent
-        level += 1
+    else:
+        return None
     return path.parent / "__manifest__.py"
 
 
