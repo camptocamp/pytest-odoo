@@ -25,6 +25,13 @@ install via::
 
     pip install pytest-odoo
 
+Since pytest version >= 8.1 configure pytest to use `odoo.addons` namespace
+using `consider_namespace_packages <https://docs.pytest.org/en/stable/
+reference/reference.html#confval-consider_namespace_packages>`_  option::
+
+   [tool.pytest.ini_options]
+   consider_namespace_packages = true
+
 usage::
 
    pytest -s --odoo-database=test --odoo-log-level=debug_sql [--odoo-http]
