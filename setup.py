@@ -20,7 +20,7 @@ setup(
         # reference/reference.html
         # #confval-consider_namespace_packages>`_ option pytest version 8.1 and
         # above works
-        'pytest>=7.2.0,!=8.0.*',
+        'pytest>=7.2.0',
     ],
     setup_requires=[
         'setuptools_scm',
