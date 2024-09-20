@@ -1,6 +1,10 @@
 name: PYPI Publish
 
 on:
+
+  workflow_run:
+    # Depend on the CI workflow
+    workflows: ["CI"]
   pull_request:
   push:
     branches:
