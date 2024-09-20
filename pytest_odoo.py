@@ -39,6 +39,11 @@ def pytest_addoption(parser):
                      action="store")
     parser.addoption("--odoo-addons-path",
                      action="store")
+    parser.addoption("--odoo-extra",
+                     action="append",
+                     default=[],
+                     help="Extra options to pass to odoo "
+                     "(e.g. --odoo-extra workers=0 --odoo-extra db-filter=odoo_test)")
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -64,6 +69,10 @@ def pytest_cmdline_main(config):
             if value:
                 odoo_arg = '--%s' % option[7:]
                 options.append('%s=%s' % (odoo_arg, value))
+
+        extra_options = config.getoption("--odoo-extra")
+        for extra_option in extra_options:
+            options.append('--%s' % extra_option)
 
         # Check the environment variables supported by the Odoo Docker image
         # ref: https://hub.docker.com/_/odoo
