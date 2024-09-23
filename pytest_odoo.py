@@ -237,7 +237,9 @@ def _find_manifest_path(collection_path: Path) -> Path:
     while level < 5  and not (path.parent / "__manifest__.py").is_file():
         path = path.parent
         level += 1
-    return path.parent / "__manifest__.py"
+    if (path.parent / "__manifest__.py").is_file():
+        return path.parent / "__manifest__.py"
+    return None
 
 
 def pytest_ignore_collect(collection_path: Path) -> Optional[bool]:
