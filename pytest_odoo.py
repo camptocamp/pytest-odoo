@@ -1,24 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 Camptocamp SA
 # Copyright 2015 Odoo
+# @author Pierre Verkest <pierre@verkest.fr>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 
 import ast
 import os
 import signal
-import sys
 import threading
 from pathlib import Path
 from typing import Optional
 
 import _pytest
-import _pytest._py.error as error
 import _pytest.python
+import pytest
+
 import odoo
 import odoo.tests
-import pytest
-from _pytest._code.code import ExceptionInfo
 
 
 def pytest_addoption(parser):
@@ -88,7 +86,7 @@ def pytest_cmdline_main(config):
             raise Exception(
                 "please provide a database name in the Odoo configuration file"
             )
-
+        monkey_patch_resolve_pkg_root_and_module_name()
         odoo.service.server.start(preload=[], stop=True)
         # odoo.service.server.start() modifies the SIGINT signal by its own
         # one which in fact prevents us to stop anthem with Ctrl-c.
@@ -139,101 +137,31 @@ def enable_odoo_test_flag():
     yield
     odoo.tools.config['test_enable'] = False
 
+def monkey_patch_resolve_pkg_root_and_module_name():
+    original_resolve_pkg_root_and_module_name = _pytest.pathlib.resolve_pkg_root_and_module_name
 
-# Original code of xmo-odoo:
-# https://github.com/odoo-dev/odoo/commit/95a131b7f4eebc6e2c623f936283153d62f9e70f
-class OdooTestModule(_pytest.python.Module):
-    """ Should only be invoked for paths inside Odoo addons
-    """
+    def resolve_pkg_root_and_module_name(
+        path: Path, *, consider_namespace_packages: bool = False
+    ) -> "tuple[Path, str]":
+        pkg_root, module_name = original_resolve_pkg_root_and_module_name(
+            path, consider_namespace_packages=consider_namespace_packages
+        )
 
-    def _importtestmodule(self):
-        # copy/paste/modified from original: removed sys.path injection &
-        # added Odoo module prefixing so import within modules is correct
-        try:
-            pypkgpath = self.fspath.pypkgpath()
-            pkgroot = pypkgpath.dirpath()
-            sep = self.fspath.sep
-            names = self.fspath.new(ext="").relto(pkgroot).split(sep)
-            if names[-1] == "__init__":
-                names.pop()
-            modname = ".".join(names)
-            # for modules in odoo/addons, since there is a __init__ the
-            # module name is already fully qualified (maybe?)
-            if (not modname.startswith('odoo.addons.')
-                    and modname != 'odoo.addons'
-                    and modname != 'odoo'):
-                modname = 'odoo.addons.' + modname
-
-            __import__(modname)
-            mod = sys.modules[modname]
-            if self.fspath.basename == "__init__.py":
-                # we don't check anything as we might
-                # we in a namespace package ... too icky to check
-                return mod
-            modfile = mod.__file__
-            if modfile[-4:] in ('.pyc', '.pyo'):
-                modfile = modfile[:-1]
-            elif modfile.endswith('$py.class'):
-                modfile = modfile[:-9] + '.py'
-            if modfile.endswith(os.path.sep + "__init__.py"):
-                if self.fspath.basename != "__init__.py":
-                    modfile = modfile[:-12]
-            try:
-                issame = self.fspath.samefile(modfile)
-            except error.ENOENT:
-                issame = False
-            if not issame:
-                raise self.fspath.ImportMismatchError(modname, modfile, self)
-        except SyntaxError as e:
-            raise self.CollectError(
-                ExceptionInfo.from_current().getrepr(style="short")
-            ) from e
-        except self.fspath.ImportMismatchError:
-            e = sys.exc_info()[1]
-            raise self.CollectError(
-                "import file mismatch:\n"
-                "imported module %r has this __file__ attribute:\n"
-                "  %s\n"
-                "which is not the same as the test file we want to collect:\n"
-                "  %s\n"
-                "HINT: remove __pycache__ / .pyc files and/or use a "
-                "unique basename for your test file modules" % e.args
-            )
-        self.config.pluginmanager.consider_module(mod)
-        return mod
-
-    def __repr__(self):
-        return "<Module %r>" % (getattr(self, "name", None), )
+        if not module_name.startswith("odoo.addons"):
+            manifest = _find_manifest_path(path)
+            if manifest and manifest.parent.name == module_name.split(".",1)[0]:
+                module_name = "odoo.addons." + module_name
+        return pkg_root, module_name
 
 
-class OdooTestPackage(_pytest.python.Package, OdooTestModule):
-    """Package with odoo module lookup.
-
-    Any python module inside the package will be imported with
-    the prefix `odoo.addons`.
-
-    This class is used to prevent loading odoo modules in duplicate,
-    which happens if a module is loaded with and without the prefix.
-    """
-
-    def __repr__(self):
-        return "<Package %r>" % (getattr(self, "name", None), )
-
-
-def pytest_pycollect_makemodule(module_path, path, parent):
-    if not _find_manifest_path(module_path):
-        return None
-    if path.basename == "__init__.py":
-        return OdooTestPackage.from_parent(parent, path=Path(path))
-    else:
-        return OdooTestModule.from_parent(parent, path=Path(path))
+    _pytest.pathlib.resolve_pkg_root_and_module_name= resolve_pkg_root_and_module_name
 
 
 def _find_manifest_path(collection_path: Path) -> Path:
     """Try to locate an Odoo manifest file in the collection path."""
     # check if collection_path is an addon directory
     path = collection_path
-    for _ in range(0, 5): 
+    for _ in range(5):
         if (path.parent / "__manifest__.py").is_file():
             break
         path = path.parent
