@@ -39,6 +39,6 @@ jobs:
         run: |
           pip install coverage
           pip install .[test]
-          coverage run -m unittest
+          coverage run -m pytest
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v3
