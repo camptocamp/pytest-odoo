@@ -37,8 +37,8 @@ jobs:
           pip install tox codecov tox-gh-actions wheel
       - name: Generate Report
         run: |
-          pip install coverage
+          pip install coverage pytest-cov
           pip install .[test]
-          coverage run -m pytest -p pytester
+          pytest --cov
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v3
