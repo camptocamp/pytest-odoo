@@ -37,8 +37,8 @@ jobs:
           pip install tox codecov tox-gh-actions wheel
       - name: Generate Report
         run: |
-          pip install coverage
-          pip install .[test]
-          coverage run -m unittest
+          tox run
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # required
