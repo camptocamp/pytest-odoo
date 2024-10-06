@@ -51,8 +51,3 @@ You can use the ``ODOO_RC`` environment variable using an odoo configuration fil
    export ODOO_RC=/path/to/odoo/config.cfg
    pytest ...
 
-
-Known issues
-------------
-
-Currently not compatible with pytest >= 8.0.0
