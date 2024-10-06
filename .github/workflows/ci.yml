@@ -21,9 +21,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - PYTHON_VERSION: "3.8"
+            os: ubuntu-latest
           - PYTHON_VERSION: "3.9"
             os: ubuntu-latest
           - PYTHON_VERSION: "3.10"
+            os: ubuntu-latest
+          - PYTHON_VERSION: "3.11"
+            os: ubuntu-latest
+          - PYTHON_VERSION: "3.12"
             os: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
