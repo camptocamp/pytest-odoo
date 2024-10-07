@@ -122,9 +122,7 @@ def _worker_db_name():
     try:
         if xdist_worker:
             db_name = f"{original_db_name}-{xdist_worker}"
-            ret = os.system(f"psql -lqt | cut -d \| -f 1 | grep -w {db_name}")
-            if ret == 0:
-                os.system(f"dropdb {db_name}")
+            os.system(f"dropdb {db_name} --if-exists")
             os.system(f"createdb -T {original_db_name} {db_name}")
             odoo.tools.config["db_name"] = db_name
         yield db_name
