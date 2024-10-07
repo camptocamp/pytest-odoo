@@ -8,6 +8,7 @@ import ast
 import os
 import signal
 import threading
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Optional
 
@@ -110,6 +111,28 @@ def load_http(request):
         signal.signal(signal.SIGINT, signal.default_int_handler)
 
 
+@contextmanager
+def _worker_db_name():
+    # This method ensure that if tests are ran in a distributed way
+    # thanks to the use of pytest-xdist addon, each worker will use
+    # a specific copy of the initial database to run their tests.
+    # In this way we prevent deadlock errors.
+    xdist_worker = os.getenv("PYTEST_XDIST_WORKER")
+    original_db_name = db_name = odoo.tests.common.get_db_name()
+    try:
+        if xdist_worker:
+            db_name = f"{original_db_name}-{xdist_worker}"
+            os.system(f"dropdb {db_name} --if-exists")
+            os.system(f"createdb -T {original_db_name} {db_name}")
+            odoo.tools.config["db_name"] = db_name
+        yield db_name
+    finally:
+        if db_name != original_db_name:
+            odoo.sql_db.close_db(db_name)
+            os.system(f"dropdb {db_name}")
+            odoo.tools.config["db_name"] = original_db_name
+
+    
 @pytest.fixture(scope='session', autouse=True)
 def load_registry():
     # Initialize the registry before running tests.
@@ -121,7 +144,9 @@ def load_registry():
     # Finally we enable `testing` flag on current thread
     # since Odoo sets it when loading test suites.
     threading.current_thread().testing = True
-    odoo.registry(odoo.tests.common.get_db_name())
+    with _worker_db_name() as db_name:
+        odoo.registry(db_name)
+        yield
 
 
 @pytest.fixture(scope='module', autouse=True)
