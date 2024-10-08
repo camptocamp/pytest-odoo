@@ -9,6 +9,7 @@ import os
 import signal
 import threading
 from contextlib import contextmanager
+from unittest import mock
 from pathlib import Path
 from typing import Optional
 
@@ -110,6 +111,21 @@ def load_http(request):
         odoo.service.server.start(stop=True)
         signal.signal(signal.SIGINT, signal.default_int_handler)
 
+@contextmanager
+def _shared_filestore(original_db_name, db_name):
+    # This method ensure that if tests are ran in a distributed way
+    # we share the filestore between the original database and the
+    # copy of the database. This is useful to avoid copying the
+    # filestore for each worker.
+    # This is done by patching the filestore method of the odoo
+    # configuration to point to the original filestore.
+    if original_db_name == db_name:
+        yield
+        return
+    with mock.patch.object(odoo.tools.config, "filestore") as filestore:
+        fs_path = os.path.join(odoo.tools.config['data_dir'], 'filestore', original_db_name)
+        filestore.return_value = fs_path
+        yield
 
 @contextmanager
 def _worker_db_name():
@@ -125,7 +141,8 @@ def _worker_db_name():
             os.system(f"dropdb {db_name} --if-exists")
             os.system(f"createdb -T {original_db_name} {db_name}")
             odoo.tools.config["db_name"] = db_name
-        yield db_name
+        with _shared_filestore(original_db_name, db_name):
+            yield db_name
     finally:
         if db_name != original_db_name:
             odoo.sql_db.close_db(db_name)
