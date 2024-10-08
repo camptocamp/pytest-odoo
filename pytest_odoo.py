@@ -141,6 +141,7 @@ def _worker_db_name():
             os.system(f"dropdb {db_name} --if-exists")
             os.system(f"createdb -T {original_db_name} {db_name}")
             odoo.tools.config["db_name"] = db_name
+            odoo.tools.config["dbfilter"] = f"^{db_name}$"
         with _shared_filestore(original_db_name, db_name):
             yield db_name
     finally:
@@ -148,6 +149,7 @@ def _worker_db_name():
             odoo.sql_db.close_db(db_name)
             os.system(f"dropdb {db_name}")
             odoo.tools.config["db_name"] = original_db_name
+            odoo.tools.config["dbfilter"] = f"^{original_db_name}$"
 
     
 @pytest.fixture(scope='session', autouse=True)
