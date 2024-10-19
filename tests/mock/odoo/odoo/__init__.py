@@ -1,4 +1,4 @@
 from . import tests
 from unittest.mock import MagicMock
-registry = MagicMock()
+modules = MagicMock()
 tools = MagicMock()
