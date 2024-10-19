@@ -19,7 +19,6 @@ import _pytest.python
 import pytest
 
 import odoo
-import odoo.tests
 
 
 def pytest_addoption(parser):
