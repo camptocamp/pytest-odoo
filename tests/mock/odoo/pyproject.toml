@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling", "hatch-odoo"]
+build-backend = "hatchling.build"
+
+[project]
+name = "odoo"
+version = "0.1.0"
+description = "Fake odoo used in unitest to avoid testing against real odoo"
+dependencies = [
+]
+
+[tool.hatch.build]
+packages = ["odoo"]

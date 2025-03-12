@@ -19,7 +19,6 @@ import _pytest.python
 import pytest
 
 import odoo
-import odoo.tests
 
 
 def pytest_addoption(parser):
@@ -165,7 +164,7 @@ def load_registry():
     # since Odoo sets it when loading test suites.
     threading.current_thread().testing = True
     with _worker_db_name() as db_name:
-        odoo.registry(db_name)
+        odoo.modules.registry.Registry(db_name)
         yield
 
 
