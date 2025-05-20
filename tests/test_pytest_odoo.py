@@ -7,6 +7,7 @@ from _pytest import pathlib as pytest_pathlib
 from pytest_odoo import (
     _find_manifest_path,
     monkey_patch_resolve_pkg_root_and_module_name,
+    disable_odoo_test_retry,
 )
 
 
@@ -84,3 +85,47 @@ class TestPytestOdoo(TestCase):
                 module_name,
                 "odoo.addons.my_module.tests.test_module"
             )
+
+    def test_disable_odoo_test_retry(self):
+        from odoo.tests import BaseCase
+
+        original_basecase_run= BaseCase.run
+
+        def restore_basecase_run():
+            BaseCase.run = original_basecase_run
+        
+        self.addCleanup(restore_basecase_run)
+
+        disable_odoo_test_retry()
+        self.assertFalse(hasattr(BaseCase, "run"))
+
+
+    def test_disable_odoo_test_retry_ignore_run_doesnt_exists(self):
+        from odoo.tests import BaseCase
+
+        original_basecase_run= BaseCase.run
+
+        def restore_basecase_run():
+            BaseCase.run = original_basecase_run
+        
+        self.addCleanup(restore_basecase_run)
+        
+        del BaseCase.run
+        
+        disable_odoo_test_retry()
+        self.assertFalse(hasattr(BaseCase, "run"))
+
+
+
+    def test_import_error(self):
+        from odoo import tests 
+        
+        original_BaseCase = tests.BaseCase
+
+        def restore_basecase():
+            tests.BaseCase = original_BaseCase
+        
+        self.addCleanup(restore_basecase)
+        
+        disable_odoo_test_retry()
+        

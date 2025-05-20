@@ -88,6 +88,7 @@ def pytest_cmdline_main(config):
             raise Exception(
                 "please provide a database name in the Odoo configuration file"
             )
+        disable_odoo_test_retry()
         monkey_patch_resolve_pkg_root_and_module_name()
         odoo.service.server.start(preload=[], stop=True)
         # odoo.service.server.start() modifies the SIGINT signal by its own
@@ -199,6 +200,20 @@ def monkey_patch_resolve_pkg_root_and_module_name():
 
 
     _pytest.pathlib.resolve_pkg_root_and_module_name= resolve_pkg_root_and_module_name
+
+
+def disable_odoo_test_retry():
+    """Odoo BaseCase.run method overload TestCase.run and manage
+    a retry mechanism that breaks using pytest launcher.
+    Using `pytest-rerunfailures` we can use `--reruns` parameters
+    if needs equivalent feature, so we remove such overload here.
+    """
+    try:
+        from odoo.tests import BaseCase
+        if hasattr(BaseCase, "run"):
+            del BaseCase.run
+    except ImportError:
+        pass
 
 
 def _find_manifest_path(collection_path: Path) -> Path:
