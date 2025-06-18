@@ -210,11 +210,10 @@ def disable_odoo_test_retry():
     """
     try:
         from odoo.tests import BaseCase
-        if hasattr(BaseCase, "run"):
-            del BaseCase.run
-    except ImportError:
+        del BaseCase.run
+    except (ImportError, AttributeError):
+        # Odoo <= 15.0
         pass
-
 
 def _find_manifest_path(collection_path: Path) -> Path:
     """Try to locate an Odoo manifest file in the collection path."""
