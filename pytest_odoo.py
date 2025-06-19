@@ -44,7 +44,10 @@ def pytest_addoption(parser):
                      default=[],
                      help="Extra options to pass to odoo "
                      "(e.g. --odoo-extra workers=0 --odoo-extra db-filter=odoo_test)")
-
+    parser.addoption("--odoo-ignore-env-db-param",
+                     action="store_true",
+                     help="Disable using environment variables for DB parameters "
+                     "(HOST, PORT, USER, PASSWORD)")
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_cmdline_main(config):
@@ -76,9 +79,10 @@ def pytest_cmdline_main(config):
 
         # Check the environment variables supported by the Odoo Docker image
         # ref: https://hub.docker.com/_/odoo
-        for arg in ['HOST', 'PORT', 'USER', 'PASSWORD']:
-            if os.environ.get(arg):
-                options.append('--db_%s=%s' % (arg.lower(), os.environ.get(arg)))
+        if not config.getoption("--odoo-ignore-env-db-param"):
+            for arg in ['HOST', 'PORT', 'USER', 'PASSWORD']:
+                if os.environ.get(arg):
+                    options.append('--db_%s=%s' % (arg.lower(), os.environ.get(arg)))
 
         odoo.tools.config.parse_config(options)
 
