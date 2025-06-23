@@ -46,6 +46,8 @@ Alternatively, you can use environment variables, like the Odoo Docker image:
 
 These only work in addition to ``--odoo-database``.
 
+In case these environment variables conflict with your setup, you may use ``--odoo-ignore-env-db-param``.
+
 You can use the ``ODOO_RC`` environment variable using an odoo configuration file, containing at least the ``database`` option with the name of the database to test::
 
    export ODOO_RC=/path/to/odoo/config.cfg
