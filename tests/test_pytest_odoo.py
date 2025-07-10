@@ -6,8 +6,9 @@ from unittest import TestCase
 from _pytest import pathlib as pytest_pathlib
 from pytest_odoo import (
     _find_manifest_path,
-    monkey_patch_resolve_pkg_root_and_module_name,
     disable_odoo_test_retry,
+    monkey_patch_resolve_pkg_root_and_module_name,
+    support_subtest,
 )
 
 
@@ -93,7 +94,7 @@ class TestPytestOdoo(TestCase):
 
         def restore_basecase_run():
             BaseCase.run = original_basecase_run
-        
+
         self.addCleanup(restore_basecase_run)
 
         disable_odoo_test_retry()
@@ -107,26 +108,67 @@ class TestPytestOdoo(TestCase):
 
         def restore_basecase_run():
             BaseCase.run = original_basecase_run
-        
+
         self.addCleanup(restore_basecase_run)
-        
+
         del BaseCase.run
-        
+
         disable_odoo_test_retry()
         self.assertFalse(hasattr(BaseCase, "run"))
 
 
 
     def test_import_error(self):
-        from odoo import tests 
-        
+        from odoo import tests
+
         original_BaseCase = tests.BaseCase
 
         def restore_basecase():
             tests.BaseCase = original_BaseCase
-        
+
         self.addCleanup(restore_basecase)
-        
+
         del tests.BaseCase
         disable_odoo_test_retry()
-        
+
+    def test_support_subtest(self):
+        from odoo.tests import case
+
+        original_test_case = case.TestCase
+        original_outcome = case._Outcome
+
+        def restore():
+            case.TestCase = original_test_case
+            case._Outcome = original_outcome
+
+        self.addCleanup(restore)
+        support_subtest()
+        from odoo.tests import BaseCase
+
+        self.assertTrue(BaseCase.subTest is TestCase.subTest)
+
+    def test_support_subtest_no_base_case(self):
+        from odoo import tests
+
+        original_BaseCase = tests.BaseCase
+
+        def restore_basecase():
+            tests.BaseCase = original_BaseCase
+
+        self.addCleanup(restore_basecase)
+
+        del tests.BaseCase
+        support_subtest()
+
+    def test_support_subtest_import_error(self):
+        from odoo.tests import case
+
+        original_odoo_test_case = case.TestCase
+
+        def restore_testcase():
+            case.TestCase = original_odoo_test_case
+
+        self.addCleanup(restore_testcase)
+
+        del case.TestCase
+        support_subtest()

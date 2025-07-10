@@ -10,7 +10,7 @@ import signal
 import subprocess
 import threading
 from contextlib import contextmanager
-from unittest import mock, TestCase
+from unittest import mock, TestCase as UnitTestTestCase
 from pathlib import Path
 from typing import Optional
 
@@ -217,18 +217,19 @@ def disable_odoo_test_retry():
         pass
 
 def support_subtest():
-    """Odoo from version 16.0 overwrite TestCase.SubTest context manager
+    """Odoo from version 16.0 re-define its own TestCase.subTest context manager
 
-    This overwrite assume the usage of OdooTestResult which we are not
-    using with pytest-odoo. So this restaure unitest SubTest Context manager
+    Odoo assume the usage of OdooTestResult which is not our case
+    using with pytest-odoo. So this fallback to the unitest.TestCase.subTest
+    Context manager
     """
     try:
-        from odoo.tests import  BaseCase
-        BaseCase.subTest = TestCase.subTest
+        from odoo.tests.case import TestCase
+        TestCase.subTest = UnitTestTestCase.subTest
 
         from odoo.tests.case import _Outcome
         _Outcome.result_supports_subtests = False
-    except (ImportError, AttributeError):
+    except ImportError:
         # Odoo <= 15.0
         pass
 
