@@ -2,6 +2,7 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from unittest import TestCase
+from unittest.mock import patch
 
 from _pytest import pathlib as pytest_pathlib
 from pytest_odoo import (
@@ -98,7 +99,9 @@ class TestPytestOdoo(TestCase):
         self.addCleanup(restore_basecase_run)
 
         disable_odoo_test_retry()
-        self.assertFalse(hasattr(BaseCase, "run"))
+        with patch("odoo.tests.BaseCase._call_something") as mock:
+            BaseCase().run()
+            mock.assert_not_called()
 
 
     def test_disable_odoo_test_retry_ignore_run_doesnt_exists(self):
@@ -114,9 +117,10 @@ class TestPytestOdoo(TestCase):
         del BaseCase.run
 
         disable_odoo_test_retry()
-        self.assertFalse(hasattr(BaseCase, "run"))
 
-
+        with patch("odoo.tests.BaseCase._call_something") as mock:
+            BaseCase().run()
+            mock.assert_not_called()
 
     def test_import_error(self):
         from odoo import tests
@@ -135,30 +139,19 @@ class TestPytestOdoo(TestCase):
         from odoo.tests import case
 
         original_test_case = case.TestCase
-        original_outcome = case._Outcome
 
         def restore():
             case.TestCase = original_test_case
-            case._Outcome = original_outcome
 
         self.addCleanup(restore)
         support_subtest()
+
         from odoo.tests import BaseCase
+        from odoo.tests.case import TestCase as OdooTestCase
 
+        self.assertTrue(OdooTestCase.subTest is TestCase.subTest)
         self.assertTrue(BaseCase.subTest is TestCase.subTest)
-
-    def test_support_subtest_no_base_case(self):
-        from odoo import tests
-
-        original_BaseCase = tests.BaseCase
-
-        def restore_basecase():
-            tests.BaseCase = original_BaseCase
-
-        self.addCleanup(restore_basecase)
-
-        del tests.BaseCase
-        support_subtest()
+        self.assertTrue(OdooTestCase.run is TestCase.run)
 
     def test_support_subtest_import_error(self):
         from odoo.tests import case

@@ -53,3 +53,5 @@ You can use the ``ODOO_RC`` environment variable using an odoo configuration fil
 
 The plugin is also compatible with distributed run provided by the `pytest-xdist <https://pypi.org/project/pytest-xdist/>`_ library. When tests are distributed, a copy of the database is created for each worker at the start of the test session.
 This is useful to avoid concurrent access to the same database, which can lead to deadlocks. The provided database is therefore used only as template. At the end of the tests, all the created databases are dropped.
+
+The plugin is also compatible with `pytest-subtests <https://pypi.org/project/pytest-subtests/>`_ library. When test use the `subTest` context manager you'll get a nice output for each sub-tests failing.
