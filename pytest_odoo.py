@@ -10,7 +10,7 @@ import signal
 import subprocess
 import threading
 from contextlib import contextmanager
-from unittest import mock
+from unittest import mock, TestCase
 from pathlib import Path
 from typing import Optional
 
@@ -89,6 +89,7 @@ def pytest_cmdline_main(config):
                 "please provide a database name in the Odoo configuration file"
             )
         disable_odoo_test_retry()
+        support_subtest()
         monkey_patch_resolve_pkg_root_and_module_name()
         odoo.service.server.start(preload=[], stop=True)
         # odoo.service.server.start() modifies the SIGINT signal by its own
@@ -211,6 +212,22 @@ def disable_odoo_test_retry():
     try:
         from odoo.tests import BaseCase
         del BaseCase.run
+    except (ImportError, AttributeError):
+        # Odoo <= 15.0
+        pass
+
+def support_subtest():
+    """Odoo from version 16.0 overwrite TestCase.SubTest context manager
+
+    This overwrite assume the usage of OdooTestResult which we are not
+    using with pytest-odoo. So this restaure unitest SubTest Context manager
+    """
+    try:
+        from odoo.tests import  BaseCase
+        BaseCase.subTest = TestCase.subTest
+
+        from odoo.tests.case import _Outcome
+        _Outcome.result_supports_subtests = False
     except (ImportError, AttributeError):
         # Odoo <= 15.0
         pass

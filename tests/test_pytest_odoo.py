@@ -127,5 +127,6 @@ class TestPytestOdoo(TestCase):
         
         self.addCleanup(restore_basecase)
         
+        del tests.BaseCase
         disable_odoo_test_retry()
         
