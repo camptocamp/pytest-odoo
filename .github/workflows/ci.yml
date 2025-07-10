@@ -31,6 +31,8 @@ jobs:
             os: ubuntu-latest
           - PYTHON_VERSION: "3.12"
             os: ubuntu-latest
+          - PYTHON_VERSION: "3.13"
+            os: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python

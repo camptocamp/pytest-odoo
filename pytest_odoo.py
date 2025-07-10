@@ -10,9 +10,10 @@ import signal
 import subprocess
 import threading
 from contextlib import contextmanager
-from unittest import mock
 from pathlib import Path
 from typing import Optional
+from unittest import TestCase as UnitTestTestCase
+from unittest import mock
 
 import _pytest
 import _pytest.python
@@ -88,6 +89,7 @@ def pytest_cmdline_main(config):
             raise Exception(
                 "please provide a database name in the Odoo configuration file"
             )
+        support_subtest()
         disable_odoo_test_retry()
         monkey_patch_resolve_pkg_root_and_module_name()
         odoo.service.server.start(preload=[], stop=True)
@@ -104,7 +106,6 @@ def pytest_cmdline_main(config):
             yield
     else:
         yield
-
 
 @pytest.fixture(scope="module", autouse=True)
 def load_http(request):
@@ -152,7 +153,7 @@ def _worker_db_name():
             odoo.tools.config["db_name"] = original_db_name
             odoo.tools.config["dbfilter"] = f"^{original_db_name}$"
 
-    
+
 @pytest.fixture(scope='session', autouse=True)
 def load_registry():
     # Initialize the registry before running tests.
@@ -202,6 +203,22 @@ def monkey_patch_resolve_pkg_root_and_module_name():
     _pytest.pathlib.resolve_pkg_root_and_module_name= resolve_pkg_root_and_module_name
 
 
+def support_subtest():
+    """Odoo from version 16.0 re-define its own TestCase.subTest context manager
+
+    Odoo assume the usage of OdooTestResult which is not our case
+    using with pytest-odoo. So this fallback to the unitest.TestCase.subTest
+    Context manager
+    """
+    try:
+        from odoo.tests.case import TestCase
+        TestCase.subTest = UnitTestTestCase.subTest
+        TestCase.run = UnitTestTestCase.run
+    except ImportError:
+        # Odoo <= 15.0
+        pass
+
+
 def disable_odoo_test_retry():
     """Odoo BaseCase.run method overload TestCase.run and manage
     a retry mechanism that breaks using pytest launcher.
@@ -214,6 +231,7 @@ def disable_odoo_test_retry():
     except (ImportError, AttributeError):
         # Odoo <= 15.0
         pass
+
 
 def _find_manifest_path(collection_path: Path) -> Path:
     """Try to locate an Odoo manifest file in the collection path."""
