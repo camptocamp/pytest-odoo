@@ -96,6 +96,9 @@ def pytest_cmdline_main(config):
         # Restore the default one.
         signal.signal(signal.SIGINT, signal.default_int_handler)
 
+        if odoo.release.version_info >= (18,):
+            odoo.modules.module.current_test = True
+
         if odoo.release.version_info < (15,):
             # Refactor in Odoo 15, not needed anymore
             with odoo.api.Environment.manage():
