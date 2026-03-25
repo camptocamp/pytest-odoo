@@ -27,7 +27,7 @@ install via::
 
 usage::
 
-   pytest -s --odoo-database=test --odoo-log-level=debug_sql [--odoo-http]
+   pytest -s --odoo-database=test --odoo-log-level=debug_sql [--odoo-http] [--odoo-skip-at-install]
 
 The custom options are:
 
@@ -35,6 +35,7 @@ The custom options are:
 * ``--odoo-log-level``: log level as expected by odoo. As time of writing: info, debug_rpc, warn, test, critical, debug_sql, error, debug, debug_rpc_answer. The default is critical to have a clean output.
 * ``--odoo-config``: path of the odoo.cfg file to use.
 * ``--odoo-http``: Allow to launch the Odoo http instance
+* ``--odoo-skip-at-install``: use to skip tests that are decorated with `@tagged("at_install")` (*Note*: this is not the default behavior because Odoo set this tag by default if not defined).
 
 
 Alternatively, you can use environment variables, like the Odoo Docker image:

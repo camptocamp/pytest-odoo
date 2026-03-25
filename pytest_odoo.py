@@ -49,6 +49,9 @@ def pytest_addoption(parser):
                      default=[],
                      help="Extra options to pass to odoo "
                      "(e.g. --odoo-extra workers=0 --odoo-extra db-filter=odoo_test)")
+    parser.addoption("--odoo-skip-at-install",
+                     action="store_true",
+                     help="If pytest should skip tests marked with at_install.")
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -291,6 +294,9 @@ def pytest_ignore_collect(collection_path: Path) -> Optional[bool]:
 
 def pytest_runtest_setup(item):
     if hasattr(item, "instance"):
+        tags = getattr(item.instance, "test_tags", set())
+        if "at_install" in tags and item.config.getoption("--odoo-skip-at-install"):
+            pytest.skip(f"Test {item.name} skipped because at_install test using --odoo-skip-at-install")
         from odoo.tests.common import HttpCase
         if isinstance(item.instance, HttpCase) and not item.config.getoption("--odoo-http"):
             pytest.skip(f"Test {item.name} skipped because it is an HttpCase and --odoo-http is not set")
