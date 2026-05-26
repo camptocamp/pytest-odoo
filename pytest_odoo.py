@@ -13,7 +13,7 @@ import threading
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Optional
-from unittest import TestCase as UnitTestTestCase
+from unittest import TestCase as UnitTestTestCase, case as UnitTestCase
 from unittest import mock
 
 import _pytest
@@ -231,10 +231,25 @@ def support_subtest():
         from odoo.tests.case import TestCase
         TestCase.subTest = UnitTestTestCase.subTest
         TestCase.run = UnitTestTestCase.run
+        if odoo.release.version_info >= (18, 0) and odoo.release.version_info < (19, 0):
+            # only version 18
+            monkey_path_unitest_outcome_test_part_executor()
     except ImportError:
         # Odoo <= 15.0
         pass
 
+def monkey_path_unitest_outcome_test_part_executor():
+    """Has we restore unitest.TestCase to avoid Odoo's test runner we 
+    need to patch the testPartExecutor method of the outcome because Odoo == 18.0
+    change the signature of the method"""
+
+    original_test_part_executor = UnitTestCase._Outcome.testPartExecutor    
+    
+    def testPartExecutor(self, test_case, subTest=False, isTest=None):
+        # Ignore isTest param
+        return original_test_part_executor(self, test_case, subTest=subTest)
+
+    UnitTestCase._Outcome.testPartExecutor = testPartExecutor
 
 def disable_odoo_test_retry():
     """Odoo BaseCase.run method overload TestCase.run and manage
