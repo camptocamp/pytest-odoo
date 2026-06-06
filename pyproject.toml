@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytest-odoo"
+dynamic = ["version"]
+description = "py.test plugin to run Odoo tests"
+readme = "README.rst"
+authors = [
+    { name = "Guewen Baconnier", email = "guewen.baconnier@camptocamp.com" }
+]
+license = { text = "AGPLv3" }
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Operating System :: POSIX",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "pytest>=8"
+]
+
+[project.urls]
+Homepage = "https://github.com/camptocamp/pytest-odoo"
+
+[project.entry-points.pytest11]
+odoo = "pytest_odoo"
+
+[tool.setuptools]
+py-modules = ["pytest_odoo"]
+zip-safe = false
+include-package-data = true
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0"
