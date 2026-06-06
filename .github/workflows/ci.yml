@@ -68,6 +68,8 @@ jobs:
           # Odoo 19
           - python: "3.13"
             tox_env: "py313-odoo19"
+          - python: "3.14"
+            tox_env: "py314-odoo19"
 
           # Unit Tests
           - python: "3.8"
@@ -82,6 +84,8 @@ jobs:
             tox_env: "py312-unit"
           - python: "3.13"
             tox_env: "py313-unit"
+          - python: "3.14"
+            tox_env: "py314-unit"
 
     steps:
       - uses: actions/checkout@v6
