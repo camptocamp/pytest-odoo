@@ -27,7 +27,7 @@ install via::
 
 usage::
 
-   pytest -s --odoo-database=test --odoo-log-level=debug_sql [--odoo-http]
+   pytest -s --odoo-database=test --odoo-log-level=debug_sql [--odoo-http] [--odoo-skip-at-install]
 
 The custom options are:
 
@@ -35,6 +35,7 @@ The custom options are:
 * ``--odoo-log-level``: log level as expected by odoo. As time of writing: info, debug_rpc, warn, test, critical, debug_sql, error, debug, debug_rpc_answer. The default is critical to have a clean output.
 * ``--odoo-config``: path of the odoo.cfg file to use.
 * ``--odoo-http``: Allow to launch the Odoo http instance
+* ``--odoo-skip-at-install``: use to skip tests that are decorated with `@tagged("at_install")` (*Note*: this is not the default behavior because Odoo set this tag by default if not defined).
 
 
 Alternatively, you can use environment variables, like the Odoo Docker image:
@@ -53,3 +54,14 @@ You can use the ``ODOO_RC`` environment variable using an odoo configuration fil
 
 The plugin is also compatible with distributed run provided by the `pytest-xdist <https://pypi.org/project/pytest-xdist/>`_ library. When tests are distributed, a copy of the database is created for each worker at the start of the test session.
 This is useful to avoid concurrent access to the same database, which can lead to deadlocks. The provided database is therefore used only as template. At the end of the tests, all the created databases are dropped.
+
+The plugin is also compatible with `pytest-subtests <https://pypi.org/project/pytest-subtests/>`_ library. When test use the `subTest` context manager you'll get a nice output for each sub-tests failing.
+
+Prerequisites
+-------------
+
+To run the integration tests (which install Odoo dependencies), you need to have the following system dependencies installed (Debian/Ubuntu):
+
+.. code-block:: bash
+
+    sudo apt-get install python3-dev libxml2-dev libxslt1-dev libsasl2-dev libldap2-dev libssl-dev libpq-dev postgresql-client

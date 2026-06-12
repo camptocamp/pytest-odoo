@@ -6,45 +6,159 @@ on:
   pull_request:
 
 jobs:
-  # TODO
-  # pre-commit:
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-python@v2
-  #       with:
-  #         python-version: "3.11"
-  #     - uses: pre-commit/action@v2.0.0
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - PYTHON_VERSION: "3.8"
-            os: ubuntu-latest
-          - PYTHON_VERSION: "3.9"
-            os: ubuntu-latest
-          - PYTHON_VERSION: "3.10"
-            os: ubuntu-latest
-          - PYTHON_VERSION: "3.11"
-            os: ubuntu-latest
-          - PYTHON_VERSION: "3.12"
-            os: ubuntu-latest
+          # Odoo 14
+          - python: "3.8"
+            tox_env: "py38-odoo14"
+          - python: "3.9"
+            tox_env: "py39-odoo14"
+          - python: "3.10"
+            tox_env: "py310-odoo14"
+
+          # Odoo 15
+          - python: "3.9"
+            tox_env: "py39-odoo15"
+          - python: "3.10"
+            tox_env: "py310-odoo15"
+          - python: "3.11"
+            tox_env: "py311-odoo15"
+
+          # Odoo 16
+          - python: "3.10"
+            tox_env: "py310-odoo16"
+          - python: "3.11"
+            tox_env: "py311-odoo16"
+          - python: "3.12"
+            tox_env: "py312-odoo16"
+
+          # Odoo 17
+          - python: "3.11"
+            tox_env: "py311-odoo17"
+          - python: "3.12"
+            tox_env: "py312-odoo17"
+          - python: "3.13"
+            tox_env: "py313-odoo17"
+
+          # Odoo 18
+          - python: "3.12"
+            tox_env: "py312-odoo18"
+          - python: "3.13"
+            tox_env: "py313-odoo18"
+
+          # Odoo 19
+          - python: "3.13"
+            tox_env: "py313-odoo19"
+          - python: "3.14"
+            tox_env: "py314-odoo19"
+
+          # Unit Tests
+          - python: "3.8"
+            tox_env: "py38-unit"
+          - python: "3.9"
+            tox_env: "py39-unit"
+          - python: "3.10"
+            tox_env: "py310-unit"
+          - python: "3.11"
+            tox_env: "py311-unit"
+          - python: "3.12"
+            tox_env: "py312-unit"
+          - python: "3.13"
+            tox_env: "py313-unit"
+          - python: "3.14"
+            tox_env: "py314-unit"
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
-          python-version: ${{matrix.PYTHON_VERSION}}
-      - name: Configure TOX
+          python-version: ${{ matrix.python }}
+
+      - name: Install System Dependencies
         run: |
-          pip install pip --upgrade
-          pip install tox codecov tox-gh-actions wheel
-      - name: Generate Report
+          sudo apt-get update
+          sudo apt-get install -y libldap2-dev libsasl2-dev libpq-dev
+
+      - name: Create Database
+        env:
+          PGPASSWORD: odoo
         run: |
-          tox run
+          psql -h localhost -U odoo -d postgres -c "CREATE USER $(whoami) WITH SUPERUSER;"
+
+      - name: Install Tox
+        run: pip install tox
+
+      - name: Run Tests
+        env:
+          # Odoo requires these to connect to the service
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: odoo
+          PGPASSWORD: odoo
+          ODOO_DB_NAME: pytest_odoo_test
+          ODOO_RC: odoo.ci.conf
+        run: tox -e ${{ matrix.tox_env }}
+
+      - name: Rename Coverage File
+        run: mv .coverage .coverage.${{ matrix.tox_env }}
+
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-${{ matrix.tox_env }}
+          path: .coverage.${{ matrix.tox_env }}
+          if-no-files-found: ignore
+          include-hidden-files: true
+
+  coverage:
+    name: Coverage
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install Coverage
+        run: pip install coverage
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v7
+
+      - name: Combine Coverage
+        run: |
+          # Artifacts are downloaded to subdirectories. Flatten them.
+          find . -name '.coverage.*' -exec mv {} . \;
+          coverage combine
+          coverage report
+          coverage xml
+
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # required
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
